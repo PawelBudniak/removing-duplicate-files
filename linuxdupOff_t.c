@@ -53,11 +53,11 @@ off_t getFileSize (const char* path){
         return -2;
     /* If fseek fails UNDEF is returned, so that the
      file can be checked again later on by filecmp */
-    if (fseeko64(fp, 0, SEEK_END)){
+    if (fseeko(fp, 0, SEEK_END)){
         fclose(fp);
         return UNDEF;
     }
-    off_t size = ftello64(fp);
+    off_t size = ftello(fp);
     fclose(fp);
     return size;
 }
@@ -222,6 +222,5 @@ int main (int argc, char** argv){
         printErrors(head, errorCount); /* errors encountered while comparing files are printed later, so that they don't mess up the script */
     fprintf(stderr, "There have been errors with %d files in total", errorCount);
     clearList (head);
-    printf("%d",sizeof(long long));
     return (EXIT_SUCCESS);
 }
