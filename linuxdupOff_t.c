@@ -92,6 +92,12 @@ int filecmp2 (FILE* fp1,  FILE* fp2){
    returns the number of errors that have occured */
 int printScript2 (Node* current){
     int errorCount = 0;
+    FILE* fp_output = fopen("script.sh", "w");
+    if (!fp_output){
+        puts("Fatal: Can't create output file");
+        exit(EXIT_FAILURE);
+    }
+
 
     while (current){
         FILE* fp1 = fopen(current->fPath, "rb");
@@ -115,7 +121,7 @@ int printScript2 (Node* current){
                 else {
                     switch (filecmp2(fp1, fp2)){
                     case 0:                 /* if they are equal remove the duplicate and make a hardlink */
-                        printf (" rm %s \n ln %s %s \n", temp->fPath, current->fPath, temp->fPath);
+                        fprintf (fp_output, "rm %s \nln %s %s \n", temp->fPath, current->fPath, temp->fPath);
                         temp->flag = 1;     /* If the file is removed in the script it gets flagged, so that it doesn't get removed multiple times */
                         break;
                     case -2:                /* (-2) returned by filecmp indicates an error with current */
@@ -129,14 +135,16 @@ int printScript2 (Node* current){
                         ++errorCount;
                         break;
                     }
+                fclose(fp2);
                 }
+               
             }
-            fclose(fp2);
-            temp = temp->next;
+        temp = temp->next;
         }
         fclose(fp1);
         current = current->next;
     }
+    fclose(fp_output);
     return errorCount;
 }
 /* 0 if dir, 1 if not */
@@ -220,7 +228,7 @@ int main (int argc, char** argv){
     errorCount = printScript2(head);   /* print the script and save error count */
     if (errorCount)
         printErrors(head, errorCount); /* errors encountered while comparing files are printed later, so that they don't mess up the script */
-    fprintf(stderr, "There have been errors with %d files in total", errorCount);
+    fprintf(stderr, "There have been errors with %d files in total\n", errorCount);
     clearList (head);
     return (EXIT_SUCCESS);
 }
